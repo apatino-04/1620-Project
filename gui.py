@@ -3,8 +3,6 @@ import csv
 import os
 
 
-
-
 class Gui:
     def __init__(self, window):
         self.window = window
@@ -43,6 +41,11 @@ class Gui:
         self.frame_three.pack(padx=10, pady=10)
 
     def access_recorded_ids(self):
+        """
+                This function checks to see if the file already exists
+                if it does, it accesses the recorded ID's and turns them into a set
+
+        """
         if os.path.exits('data.csv'):
             with open('data.csv', mode='r') as file:
                 reader = csv.reader(file)
@@ -50,37 +53,48 @@ class Gui:
                     if row:
                         self.recorded_ids.add(int(row[0]))
 
-
     def submit(self):
         id_num = self.input_id.get().strip()
 
+        #   Catches non-integer responses
         try:
             id_num = int(id_num)
 
         except ValueError:
             self.mess_label.config(text=f'ID numer is made up of numbers only', fg='red')
         else:
+
+            #   Catches responses less than 6 integers
             if len(str(id_num)) != 6:
                 self.mess_label.config(text='ID number must be 6 digits long', fg='red')
+
+            #   Catches ID's already registered
             elif id_num in self.recorded_ids:
                 self.mess_label.config(text='This ID has already voted', fg='red')
-            else:
 
+            else:
                 option = self.radio_answer.get()
+
+                #   Catches if user doesn't select a candidate
                 if option == 0:
                     self.mess_label.config(text='Please select a candidate', fg='red')
                 else:
                     if option == 1:
                         candidate = 'Jane'
-                        self.mess_label.config(text=f'Vote recorded for {candidate}',fg='green')
+                        self.mess_label.config(text=f'Vote recorded for {candidate}', fg='green')
                     else:
                         candidate = 'John'
                         self.mess_label.config(text=f'Vote recorded for {candidate}', fg='green')
 
-                    #Write to file
+                    #   Writes to file
                     with open('data.csv', mode='a', newline='') as file:
                         writer = csv.writer(file)
                         writer.writerow([id_num, candidate])
 
+                    #   Adds ID's to set
                     self.recorded_ids.add(id_num)
+
+                    #   Refreshes ID input box
                     self.input_id.delete(0, 'end')
+                    #   Refreshes Radio Button
+                    self.radio_answer = 0
